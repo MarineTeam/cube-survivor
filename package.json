@@ -15,9 +15,10 @@
     "three": "latest"
   },
   "devDependencies": {
-    "typescript": "latest",
+    "typescript": "^5.0.0",
     "@types/node": "latest",
     "@types/react": "latest",
+    "@types/react-dom": "latest",
     "@types/three": "latest"
   }
 }

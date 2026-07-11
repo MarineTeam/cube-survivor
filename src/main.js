@@ -1,47 +1,19 @@
 import './style.css'
 
-const dialog = document.querySelector('#gameDialog')
-const arcade = document.querySelector('#arcade')
-const field = document.querySelector('#gameField')
-const ship = document.querySelector('#ship')
-const scoreEl = document.querySelector('#score')
-const bestEl = document.querySelector('#best')
-const gameOver = document.querySelector('#gameOver')
-const finalScore = document.querySelector('#finalScore')
-let active = false, position = 50, score = 0, lastTime = 0, spawnClock = 0, cubes = []
-let best = Number(localStorage.getItem('cube-survivor-best') || 0)
-bestEl.textContent = String(best).padStart(4, '0')
-
-document.querySelector('#playButton').addEventListener('click', () => dialog.showModal())
-document.querySelector('#closeDialog').addEventListener('click', () => dialog.close())
-document.querySelector('#startButton').addEventListener('click', startGame)
-document.querySelector('#restartButton').addEventListener('click', startGame)
-document.querySelector('#quitButton').addEventListener('click', stopGame)
-document.querySelector('#howButton').addEventListener('click', () => document.querySelector('#how').scrollIntoView({ behavior: 'smooth' }))
-document.querySelector('#soundToggle').addEventListener('click', e => e.currentTarget.classList.toggle('muted'))
-
-function startGame() {
-  dialog.close(); gameOver.classList.remove('show'); arcade.classList.add('show'); arcade.setAttribute('aria-hidden', 'false')
-  cubes.forEach(c => c.el.remove()); cubes = []; position = 50; score = 0; spawnClock = 0; lastTime = 0; active = true
-  ship.style.left = `${position}%`; scoreEl.textContent = '0000'; requestAnimationFrame(tick)
-}
-function stopGame() { active = false; arcade.classList.remove('show'); arcade.setAttribute('aria-hidden', 'true') }
-function move(direction) { if (active) { position = Math.max(7, Math.min(93, position + direction * 7)); ship.style.left = `${position}%` } }
-function tick(time) {
-  if (!active) return
-  const delta = Math.min(32, time - lastTime || 16); lastTime = time; score += delta / 14
-  scoreEl.textContent = String(Math.floor(score)).padStart(4, '0'); spawnClock += delta
-  if (spawnClock > Math.max(240, 700 - score * 2.2)) { spawnClock = 0; spawnCube() }
-  const shipBox = ship.getBoundingClientRect()
-  cubes = cubes.filter(c => {
-    c.y += delta * (.14 + score / 8200); c.el.style.transform = `translate(-50%, ${c.y}px) rotate(${c.y / 5}deg)`
-    const box = c.el.getBoundingClientRect()
-    if (box.bottom > shipBox.top + 10 && box.top < shipBox.bottom && box.right > shipBox.left + 8 && box.left < shipBox.right - 8) { endGame(); return false }
-    if (c.y > field.clientHeight + 70) { c.el.remove(); return false } return true
-  })
-  requestAnimationFrame(tick)
-}
-function spawnCube() { const el = document.createElement('div'); el.className = `enemy enemy-${Math.floor(Math.random() * 4)}`; el.style.left = `${6 + Math.random() * 88}%`; field.appendChild(el); cubes.push({ el, y: -70 }) }
-function endGame() { active = false; const final = Math.floor(score); if (final > best) { best = final; localStorage.setItem('cube-survivor-best', best) }; bestEl.textContent = String(best).padStart(4, '0'); finalScore.textContent = String(final).padStart(4, '0'); gameOver.classList.add('show') }
-document.addEventListener('keydown', e => { if (['ArrowLeft', 'a', 'A'].includes(e.key)) { e.preventDefault(); move(-1) }; if (['ArrowRight', 'd', 'D'].includes(e.key)) { e.preventDefault(); move(1) } })
-document.querySelectorAll('[data-move]').forEach(button => button.addEventListener('pointerdown', () => move(button.dataset.move === 'left' ? -1 : 1)))
+const $ = s => document.querySelector(s)
+const canvas = $('#stars'), ctx = canvas.getContext('2d')
+let chosen = 'VANGUARD', active = false, x = 50, score = 0, start = 0, last = 0, spawn = 0, enemies = [], best = Number(localStorage.getItem('cube-best') || 0)
+$('#best').textContent = String(best).padStart(4, '0')
+function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);drawStars()}
+function drawStars(){ctx.clearRect(0,0,innerWidth,innerHeight);for(let i=0;i<110;i++){let x=Math.random()*innerWidth,y=Math.random()*innerHeight;ctx.fillStyle=i%8?'#7b8bb633':'#3ef0ff';ctx.fillRect(x,y,1,1)}}
+resize(); addEventListener('resize',resize)
+$('#ackBtn').onclick=()=>{$('#warning').classList.add('hidden');$('#menu').classList.remove('hidden')}
+document.querySelectorAll('.mode').forEach((b,i)=>b.onclick=()=>{document.querySelector('.mode.selected').classList.remove('selected');b.classList.add('selected');$('#modeInfo').textContent=['A balanced 10-minute arena run. Elites appear every two minutes.','One life. Tougher packs. No second chances.','No finish line. Survive for as long as you can.'][i]})
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.querySelector('.card.selected').classList.remove('selected');c.classList.add('selected');chosen=c.dataset.name})
+$('#deployBtn').onclick=startGame; $('#again').onclick=startGame; $('#quit').onclick=()=>{active=false;$('#game').classList.add('hidden');$('#menu').classList.remove('hidden')}
+function startGame(){ $('#menu').classList.add('hidden');$('#gameover').classList.add('hidden');$('#game').classList.remove('hidden');enemies.forEach(e=>e.el.remove());enemies=[];x=50;score=0;start=performance.now();last=0;spawn=0;active=true;$('#player').style.left='50%';$('#player').style.top='75%';requestAnimationFrame(loop) }
+function move(d){if(active){x=Math.max(5,Math.min(95,x+d*7));$('#player').style.left=x+'%'}}
+function loop(now){if(!active)return;let dt=Math.min(35,now-last||16);last=now;score=Math.floor((now-start)/100);let seconds=Math.floor((now-start)/1000);$('#time').textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;$('#level').textContent=String(Math.floor(score/12)+1).padStart(2,'0');$('#xp').textContent=`${score%10} / 10`;spawn+=dt;if(spawn>Math.max(260,690-score*2)){spawn=0;addEnemy()}let p=$('#player').getBoundingClientRect();enemies=enemies.filter(e=>{e.y+=dt*(.11+score/7000);e.el.style.top=e.y+'px';let r=e.el.getBoundingClientRect();if(r.bottom>p.top+5&&r.top<p.bottom&&r.right>p.left+5&&r.left<p.right-5){endGame();return false}if(e.y>innerHeight+50){e.el.remove();return false}return true});requestAnimationFrame(loop)}
+function addEnemy(){let el=document.createElement('i');el.className='enemy'+(Math.random()>.62?' alt':'');el.style.left=(4+Math.random()*92)+'%';el.style.top='-40px';$('#arena').appendChild(el);enemies.push({el,y:-40})}
+function endGame(){active=false;if(score>best){best=score;localStorage.setItem('cube-best',best)}$('#best').textContent=String(best).padStart(4,'0');$('#finalScore').textContent=String(score).padStart(4,'0');$('#finalTime').textContent=$('#time').textContent;$('#game').classList.add('hidden');$('#gameover').classList.remove('hidden')}
+addEventListener('keydown',e=>{if(['ArrowLeft','a','A'].includes(e.key)){e.preventDefault();move(-1)}if(['ArrowRight','d','D'].includes(e.key)){e.preventDefault();move(1)}});document.querySelectorAll('[data-move]').forEach(b=>b.onpointerdown=()=>move(b.dataset.move==='left'?-1:1))

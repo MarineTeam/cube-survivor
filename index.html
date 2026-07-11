@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cube Survivor</title>
+    <meta name="theme-color" content="#080a15" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <nav class="topbar">
+        <a class="brand" href="#top" aria-label="Cube Survivor home"><span class="brand-cube"></span><span>CUBE <b>SURVIVOR</b></span></a>
+        <div class="nav-actions"><button class="sound" id="soundToggle" aria-label="Toggle sound">♫</button><button class="small-button" id="howButton">HOW TO PLAY</button></div>
+      </nav>
+
+      <section class="hero" id="top">
+        <div class="grid-floor"></div>
+        <div class="glow glow-pink"></div><div class="glow glow-blue"></div>
+        <div class="hero-content">
+          <p class="eyebrow">ENDLESS ARCADE SURVIVAL</p>
+          <h1>DON'T GET<br /><span>CRUSHED.</span></h1>
+          <p class="intro">Dodge the falling cubes. Chase the high score.<br />How long can you survive?</p>
+          <button class="play-button" id="playButton"><span class="play-icon">▶</span> PLAY NOW</button>
+          <p class="controls"><kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> TO MOVE</p>
+        </div>
+        <div class="cube-scene" aria-hidden="true">
+          <div class="orb orb-one"></div><div class="orb orb-two"></div>
+          <div class="falling cube-a"></div><div class="falling cube-b"></div><div class="falling cube-c"></div>
+          <div class="player-cube"><i></i><b></b></div>
+        </div>
+      </section>
+
+      <section class="stats" id="how">
+        <div><span class="stat-num">∞</span><span class="stat-label">ENDLESS RUNS</span></div>
+        <div><span class="stat-num">01</span><span class="stat-label">ONE MISSION</span></div>
+        <div><span class="stat-num">100%</span><span class="stat-label">PURE REFLEXES</span></div>
+      </section>
+    </main>
+    <dialog id="gameDialog">
+      <div class="dialog-inner"><button class="close" id="closeDialog">×</button><p class="eyebrow">READY, PLAYER?</p><h2>SURVIVE THE<br /><span>CUBE STORM.</span></h2><p>Use the arrow keys or A / D to weave through the falling cubes. The longer you last, the faster they fall.</p><button class="play-button" id="startButton">START RUN</button></div>
+    </dialog>
+    <section class="arcade" id="arcade" aria-hidden="true">
+      <div class="hud"><a class="brand" href="#top"><span class="brand-cube"></span><span>CUBE <b>SURVIVOR</b></span></a><div class="hud-score"><span>SCORE</span><strong id="score">0000</strong></div><div class="hud-score"><span>BEST</span><strong id="best">0000</strong></div><button class="quit" id="quitButton">QUIT</button></div>
+      <div class="game-field" id="gameField"><div class="game-grid"></div><div class="ship" id="ship"></div><div class="mobile-controls"><button data-move="left">←</button><button data-move="right">→</button></div></div>
+      <div class="game-over" id="gameOver"><p class="eyebrow">RUN COMPLETE</p><h2>YOU GOT<br><span id="finalScore">0000</span></h2><p>One more try?</p><button class="play-button" id="restartButton">PLAY AGAIN</button></div>
+    </section>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
